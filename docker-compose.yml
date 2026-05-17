@@ -1,0 +1,96 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: synthron-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: synthron-chroma
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=FALSE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  synthron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: synthron-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - CEREBRAS_API_KEY=${CEREBRAS_API_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - SQLITE_URL=sqlite+aiosqlite:////app/data/episodic/episodes.db
+      - CHROMA_PERSIST_DIR=/app/data/chroma
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SYNTHRON_ENV=production
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    volumes:
+      - synthron_logs:/app/logs
+      - synthron_data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  dashboard:
+    image: nginx:alpine
+    container_name: synthron-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    volumes:
+      - ./synthron/dashboard/static:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - synthron
+
+volumes:
+  redis_data:
+  chroma_data:
+  synthron_logs:
+  synthron_data:
+
+networks:
+  default:
+    name: synthron-network
