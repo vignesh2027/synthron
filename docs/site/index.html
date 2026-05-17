@@ -4,747 +4,466 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SYNTHRON — Multi-Agent AI Framework</title>
-  <meta name="description" content="The most powerful open-source multi-agent AI framework. 35M+ free tokens/day, 7 LLM providers, 8 specialized agents, self-improving." />
+  <meta name="description" content="The most powerful open-source multi-agent AI orchestration framework. 35M+ free tokens/day, 7 LLM providers, 8 specialized agents, self-improving." />
   <meta property="og:title" content="SYNTHRON — Multi-Agent AI Framework" />
-  <meta property="og:description" content="Beat LangChain, CrewAI, and AutoGPT combined. 35M+ free tokens/day." />
-  <meta property="og:image" content="https://vignesh2027.github.io/synthron/og.png" />
+  <meta property="og:description" content="35M+ free tokens/day. Beat LangChain, CrewAI, AutoGPT." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #050508;
-      --surface: #0d0d14;
-      --surface2: #13131e;
-      --border: #1e1e2e;
-      --accent: #7c3aed;
-      --accent2: #06b6d4;
-      --accent3: #10b981;
-      --text: #e2e2f0;
-      --muted: #6b7280;
-      --code-bg: #0d0d14;
+      --bg:       #faf9f7;
+      --surface:  #ffffff;
+      --surface2: #f3f1ee;
+      --border:   #e8e3dc;
+      --accent:   #7c3aed;
+      --accent2:  #0891b2;
+      --accent3:  #059669;
+      --text:     #1c1917;
+      --muted:    #78716c;
+      --shadow:   0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-lg:0 10px 30px rgba(0,0,0,0.08);
     }
 
     html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    /* ── GRID NOISE BACKGROUND ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
 
     /* ── NAV ── */
     nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2rem;
-      background: rgba(5,5,8,0.85);
-      backdrop-filter: blur(12px);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 2.5rem;
+      background: rgba(250,249,247,0.92); backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
-
-    .nav-logo {
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #7c3aed, #06b6d4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
+    .nav-logo { font-size: 1.15rem; font-weight: 800; background: linear-gradient(135deg, #7c3aed, #0891b2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
-
-    .nav-cta {
-      background: var(--accent);
-      color: white !important;
-      padding: 0.5rem 1.25rem;
-      border-radius: 8px;
-      font-weight: 600 !important;
-      transition: opacity 0.2s !important;
-    }
-
-    .nav-cta:hover { opacity: 0.85; }
-
-    .live-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(16,185,129,0.12);
-      border: 1px solid rgba(16,185,129,0.3);
-      color: #10b981;
-      padding: 0.35rem 0.9rem;
-      border-radius: 100px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-    .live-badge::before {
-      content: '';
-      width: 7px; height: 7px;
-      background: #10b981;
-      border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-    .live-badge:hover { background: rgba(16,185,129,0.2); }
+    .nav-pill { background: var(--accent); color: white !important; padding: 0.45rem 1.1rem; border-radius: 100px; font-weight: 600 !important; }
 
     /* ── HERO ── */
     .hero {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 6rem 2rem 4rem;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 7rem 2rem 4rem; position: relative;
     }
-
-    .hero-glow {
-      position: absolute;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 400px;
-      background: radial-gradient(ellipse, rgba(124,58,237,0.15) 0%, transparent 70%);
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124,58,237,0.06) 0%, transparent 70%);
       pointer-events: none;
     }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(124,58,237,0.12);
-      border: 1px solid rgba(124,58,237,0.3);
-      color: #a78bfa;
-      padding: 0.4rem 1rem;
-      border-radius: 100px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      margin-bottom: 2rem;
-      letter-spacing: 0.5px;
+    .live-pill {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;
+      padding: 0.35rem 1rem; border-radius: 100px; font-size: 0.78rem; font-weight: 700;
+      margin-bottom: 1.5rem; text-decoration: none; transition: background 0.2s;
     }
+    .live-pill::before { content: ''; width: 7px; height: 7px; background: #059669; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    .live-pill:hover { background: #d1fae5; }
 
-    .hero h1 {
-      font-size: clamp(2.5rem, 7vw, 5.5rem);
-      font-weight: 900;
-      letter-spacing: -2px;
-      line-height: 1.05;
-      margin-bottom: 1.5rem;
+    .hero h1 { font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 900; letter-spacing: -2.5px; line-height: 1.05; margin-bottom: 1.5rem; }
+    .grad { background: linear-gradient(135deg, #7c3aed 0%, #0891b2 60%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.15rem; color: var(--muted); max-width: 580px; margin: 0 auto 2.5rem; line-height: 1.75; }
+
+    .hero-btns { display: flex; gap: 0.9rem; flex-wrap: wrap; justify-content: center; margin-bottom: 4rem; }
+    .btn-main { background: var(--accent); color: white; padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1rem; box-shadow: 0 4px 16px rgba(124,58,237,0.35); transition: all 0.2s; }
+    .btn-main:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.4); }
+    .btn-out { background: var(--surface); color: var(--text); padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 1rem; border: 1.5px solid var(--border); transition: all 0.2s; }
+    .btn-out:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── STATS BAR ── */
+    .stats-bar { display: flex; justify-content: center; gap: 0; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); max-width: 700px; width: 100%; }
+    .stat { flex: 1; min-width: 120px; text-align: center; padding: 1.2rem 1rem; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-v { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; background: linear-gradient(135deg, #7c3aed, #0891b2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-l { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-top: 0.2rem; }
+
+    /* ── DASHBOARD PREVIEW ── */
+    .preview-section { padding: 5rem 2rem; background: var(--surface2); }
+    .preview-section .container { max-width: 1100px; margin: 0 auto; }
+    .section-tag { font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent2); margin-bottom: 0.75rem; display: block; }
+    h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -1px; margin-bottom: 0.75rem; }
+    .sub { color: var(--muted); font-size: 1rem; max-width: 540px; margin-bottom: 2.5rem; line-height: 1.7; }
+
+    .dashboard-preview {
+      background: #faf9f7; border: 1.5px solid var(--border); border-radius: 14px;
+      overflow: hidden; box-shadow: var(--shadow-lg);
     }
-
-    .gradient-text {
-      background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 50%, #10b981 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .preview-bar {
+      background: #ffffff; border-bottom: 1px solid var(--border);
+      padding: 0.7rem 1rem; display: flex; align-items: center; gap: 0.5rem;
     }
-
-    .hero p {
-      font-size: 1.2rem;
-      color: var(--muted);
-      max-width: 620px;
-      margin: 0 auto 2.5rem;
-      line-height: 1.7;
+    .preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .preview-url {
+      margin-left: 0.5rem; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.3rem 0.8rem; font-size: 0.78rem; color: var(--muted);
+      font-family: 'JetBrains Mono', monospace; flex: 1; max-width: 360px;
     }
-
-    .hero-actions {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 3rem;
+    .preview-open {
+      margin-left: auto; background: var(--accent); color: white; padding: 0.35rem 0.9rem;
+      border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-decoration: none;
+      transition: opacity 0.2s;
     }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #7c3aed, #6d28d9);
-      color: white;
-      padding: 0.85rem 2rem;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 1rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+    .preview-open:hover { opacity: 0.85; }
+    .preview-body {
+      display: grid; grid-template-columns: 220px 1fr 240px; height: 380px;
     }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(124,58,237,0.5);
+    .preview-sidebar {
+      background: #f5f3f0; border-right: 1px solid var(--border); padding: 14px;
+      display: flex; flex-direction: column; gap: 8px;
     }
+    .preview-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .preview-card-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+    .agent-row { display: flex; align-items: center; gap: 7px; padding: 4px 0; font-size: 11px; font-weight: 500; }
+    .adot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .adot.run { animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-    .btn-secondary {
-      background: var(--surface2);
-      color: var(--text);
-      padding: 0.85rem 2rem;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 1rem;
-      border: 1px solid var(--border);
-      transition: border-color 0.2s, background 0.2s;
-    }
+    .preview-main { display: flex; flex-direction: column; }
+    .preview-stream { flex: 1; padding: 12px 16px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    .pe { display: flex; gap: 7px; align-items: flex-start; padding: 5px 8px; border-radius: 6px; border-left: 3px solid transparent; }
+    .pe.thought { border-left-color: #a78bfa; background: #faf8ff; }
+    .pe.action  { border-left-color: #f59e0b; background: #fffbf0; }
+    .pe.result  { border-left-color: #059669; background: #f0fdf6; }
+    .pe.plan    { border-left-color: #7c3aed; background: #f5f3ff; }
+    .ptag { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
+    .ptag.pl { background: #ede9fe; color: #6d28d9; }
+    .ptag.ex { background: #d1fae5; color: #065f46; }
+    .ptag.cr { background: #fef3c7; color: #92400e; }
+    .ptag.or { background: #e0e7ff; color: #3730a3; }
 
-    .btn-secondary:hover {
-      border-color: var(--accent);
-      background: rgba(124,58,237,0.08);
-    }
+    .preview-input { padding: 10px 14px; background: white; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .preview-input-box { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 11px; color: var(--muted); }
+    .preview-run { background: var(--accent); color: white; border: none; border-radius: 6px; padding: 7px 14px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
-    /* ── CODE BLOCK ── */
-    .code-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      text-align: left;
-      max-width: 560px;
-      margin: 0 auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-    }
-
-    .code-line { display: flex; align-items: center; gap: 0.75rem; padding: 0.2rem 0; }
-    .code-comment { color: #4b5563; }
-    .code-keyword { color: #7c3aed; }
-    .code-string { color: #10b981; }
-    .code-fn { color: #06b6d4; }
-    .code-prompt { color: #6b7280; }
-
-    /* ── STATS ── */
-    .stats {
-      display: flex;
-      justify-content: center;
-      gap: 3rem;
-      flex-wrap: wrap;
-      margin-top: 4rem;
-      padding: 2rem;
-      border-top: 1px solid var(--border);
-    }
-
-    .stat { text-align: center; }
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #7c3aed, #06b6d4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .stat-label { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
-
-    /* ── SECTIONS ── */
-    section {
-      position: relative;
-      z-index: 1;
-      padding: 5rem 2rem;
-    }
-
-    .container { max-width: 1100px; margin: 0 auto; }
-
-    .section-tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent2);
-      margin-bottom: 1rem;
-    }
-
-    h2 {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 1rem;
-    }
-
-    .section-sub {
-      color: var(--muted);
-      font-size: 1.05rem;
-      max-width: 560px;
-      margin-bottom: 3rem;
-    }
+    .preview-right { background: #f5f3f0; border-left: 1px solid var(--border); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .metric-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .metric-box { background: white; border: 1px solid var(--border); border-radius: 7px; padding: 8px; text-align: center; }
+    .metric-box .mv { font-size: 18px; font-weight: 800; }
+    .metric-box .ml { font-size: 9px; font-weight: 600; text-transform: uppercase; color: var(--muted); }
+    .provider-mini { display: flex; flex-direction: column; gap: 4px; }
+    .prov-row { display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 6px; padding: 5px 8px; font-size: 10px; font-weight: 500; }
+    .prov-badge { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 100px; background: #dcfce7; color: #166534; }
 
     /* ── COMPARISON TABLE ── */
-    .compare-table {
-      width: 100%;
-      border-collapse: collapse;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
+    .compare-section { padding: 5rem 2rem; }
+    .compare-section .container { max-width: 1000px; margin: 0 auto; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--border); box-shadow: var(--shadow); }
+    th { background: var(--surface2); padding: 0.9rem 1rem; text-align: center; font-weight: 700; font-size: 0.85rem; border-bottom: 1.5px solid var(--border); color: var(--text); }
+    th:first-child { text-align: left; }
+    td { padding: 0.8rem 1rem; text-align: center; font-size: 0.875rem; border-bottom: 1px solid #f3f1ee; color: var(--muted); }
+    td:first-child { text-align: left; font-weight: 500; color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #faf9f7; }
+    .synth { background: rgba(124,58,237,0.05) !important; color: var(--accent) !important; font-weight: 700 !important; }
+    .ck { color: #059669; font-weight: 700; }
+    .cx { color: #dc2626; }
 
-    .compare-table th {
-      background: var(--surface);
-      padding: 1rem;
-      text-align: center;
-      font-weight: 700;
-      font-size: 0.9rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .compare-table th:first-child { text-align: left; }
-    .compare-table td {
-      padding: 0.85rem 1rem;
-      text-align: center;
-      font-size: 0.9rem;
-      border-bottom: 1px solid rgba(30,30,46,0.5);
-    }
-
-    .compare-table td:first-child { text-align: left; color: var(--muted); }
-    .compare-table tr:last-child td { border-bottom: none; }
-    .compare-table tr:hover td { background: rgba(124,58,237,0.04); }
-
-    .synthron-col { background: rgba(124,58,237,0.06) !important; color: #a78bfa; font-weight: 700; }
-    .check { color: #10b981; font-size: 1.1rem; }
-    .cross { color: #ef4444; font-size: 1.1rem; }
-    .partial { color: #f59e0b; font-size: 0.85rem; }
-
-    /* ── FEATURE GRID ── */
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.75rem;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-
-    .feature-card:hover {
-      border-color: rgba(124,58,237,0.4);
-      transform: translateY(-2px);
-    }
-
-    .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .feature-card h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-
-    .feature-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+    /* ── FEATURES ── */
+    .features-section { padding: 5rem 2rem; background: var(--surface2); }
+    .features-section .container { max-width: 1100px; margin: 0 auto; }
+    .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.25rem; }
+    .feat-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: all 0.2s; box-shadow: var(--shadow); }
+    .feat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(124,58,237,0.3); }
+    .feat-icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+    .feat-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .feat-card p { color: var(--muted); font-size: 0.875rem; line-height: 1.65; }
 
     /* ── PROVIDERS ── */
-    .provider-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1rem;
-    }
-
-    .provider-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.25rem;
-      text-align: center;
-      transition: border-color 0.2s;
-    }
-
-    .provider-card:hover { border-color: rgba(6,182,212,0.4); }
-    .provider-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.25rem; }
-    .provider-free { color: #10b981; font-size: 0.75rem; font-weight: 600; }
-    .provider-limit { color: var(--muted); font-size: 0.72rem; margin-top: 0.2rem; }
+    .providers-section { padding: 5rem 2rem; }
+    .providers-section .container { max-width: 900px; margin: 0 auto; }
+    .prov-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+    .prov-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; box-shadow: var(--shadow); transition: all 0.2s; }
+    .prov-card:hover { border-color: var(--accent2); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .prov-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .prov-free { color: var(--accent3); font-size: 0.75rem; font-weight: 700; }
+    .prov-limit { color: var(--muted); font-size: 0.72rem; margin-top: 0.2rem; }
 
     /* ── INSTALL ── */
-    .install-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
+    .install-section { padding: 5rem 2rem; background: var(--surface2); }
+    .install-section .container { max-width: 780px; margin: 0 auto; }
+    .code-box {
+      background: #1c1917; color: #e7e5e4; border-radius: 12px;
+      overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid #292524;
     }
+    .code-header { background: #292524; padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-label { margin-left: auto; font-size: 0.75rem; color: #78716c; font-family: 'JetBrains Mono', monospace; }
+    .code-body { padding: 1.5rem 1.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; line-height: 1.9; overflow-x: auto; }
+    .c-comment { color: #57534e; }
+    .c-prompt { color: #78716c; }
+    .c-cmd { color: #e7e5e4; }
+    .c-kw { color: #c084fc; }
+    .c-fn { color: #67e8f9; }
+    .c-str { color: #86efac; }
 
-    .install-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .tab {
-      padding: 0.75rem 1.5rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: color 0.2s, border-color 0.2s;
-    }
-
-    .tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
-
-    .install-code {
-      padding: 1.5rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.88rem;
-      line-height: 1.8;
-      overflow-x: auto;
-    }
+    /* ── CTA ── */
+    .cta-section { padding: 6rem 2rem; text-align: center; background: linear-gradient(135deg, rgba(124,58,237,0.06) 0%, rgba(8,145,178,0.06) 100%); border-top: 1px solid var(--border); }
+    .cta-section h2 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -1.5px; margin-bottom: 1rem; }
+    .cta-section p { color: var(--muted); max-width: 500px; margin: 0 auto 2.5rem; font-size: 1.05rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
     /* ── FOOTER ── */
-    footer {
-      position: relative;
-      z-index: 1;
-      border-top: 1px solid var(--border);
-      padding: 3rem 2rem;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.875rem;
-    }
-
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--text); }
-
-    .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    footer { border-top: 1px solid var(--border); padding: 2.5rem 2rem; text-align: center; color: var(--muted); font-size: 0.85rem; background: var(--surface); }
+    .foot-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .foot-links a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .foot-links a:hover { color: var(--accent); }
 
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .stats { gap: 1.5rem; }
-      .compare-table { font-size: 0.8rem; }
-      .compare-table th, .compare-table td { padding: 0.6rem 0.5rem; }
+      .preview-body { grid-template-columns: 1fr; height: auto; }
+      .preview-sidebar, .preview-right { display: none; }
     }
   </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
   <div class="nav-logo">⚡ SYNTHRON</div>
   <ul class="nav-links">
+    <li><a href="#preview">Dashboard</a></li>
     <li><a href="#features">Features</a></li>
     <li><a href="#providers">Providers</a></li>
     <li><a href="#install">Install</a></li>
     <li><a href="https://github.com/vignesh2027/synthron/tree/main/docs">Docs</a></li>
-    <li><a href="https://github.com/vignesh2027/synthron" class="nav-cta">GitHub</a></li>
+    <li><a href="https://github.com/vignesh2027/synthron" class="nav-pill">GitHub ↗</a></li>
   </ul>
 </nav>
 
-<!-- ── HERO ── -->
-<div class="hero">
-  <div class="hero-glow"></div>
-
-  <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem">
-    <div class="badge">🚀 Open Source · MIT License · v1.0</div>
-    <a href="https://synthron-clwp.onrender.com" target="_blank" class="live-badge">LIVE DEMO</a>
-  </div>
+<!-- HERO -->
+<section class="hero">
+  <a href="https://synthron-clwp.onrender.com/dashboard" target="_blank" class="live-pill">
+    LIVE DEMO RUNNING
+  </a>
 
   <h1>
-    The AI Agent<br />
-    Framework That<br />
-    <span class="gradient-text">Actually Works</span>
+    Multi-Agent AI<br/>
+    <span class="grad">Orchestration</span><br/>
+    That Actually Works
   </h1>
 
   <p>
-    Multi-agent orchestration with 35M+ free tokens/day.
-    7 LLM providers, 8 specialized agents, 4-tier memory, and a self-improving engine —
-    all in one Python package.
+    7 LLM providers with automatic failover. 8 specialized agents running in parallel.
+    4-tier memory. Self-improving. One Python package. Zero complexity.
   </p>
 
-  <div class="hero-actions">
-    <a href="https://synthron-clwp.onrender.com" target="_blank" class="btn-primary">🔴 Live Dashboard →</a>
-    <a href="https://github.com/vignesh2027/synthron" class="btn-secondary">⭐ Star on GitHub</a>
-    <a href="#install" class="btn-secondary">Get Started</a>
+  <div class="hero-btns">
+    <a href="https://synthron-clwp.onrender.com/dashboard" target="_blank" class="btn-main">🔴 Open Live Dashboard →</a>
+    <a href="https://github.com/vignesh2027/synthron" target="_blank" class="btn-out">⭐ Star on GitHub</a>
+    <a href="#install" class="btn-out">pip install synthron</a>
   </div>
 
-  <div class="code-block">
-    <div class="code-line"><span class="code-comment"># Install in seconds</span></div>
-    <div class="code-line"><span class="code-prompt">$</span> <span style="color:#e2e2f0">pip install synthron</span></div>
-    <div class="code-line"></div>
-    <div class="code-line"><span class="code-comment"># Use in one line</span></div>
-    <div class="code-line"><span class="code-keyword">from</span> <span style="color:#e2e2f0">synthron</span> <span class="code-keyword">import</span> <span class="code-fn">run</span></div>
-    <div class="code-line"><span style="color:#e2e2f0">result = </span><span class="code-keyword">await</span> <span class="code-fn">run</span><span style="color:#e2e2f0">(</span><span class="code-string">"Your task here"</span><span style="color:#e2e2f0">)</span></div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-v">35M+</div><div class="stat-l">Free tokens/day</div></div>
+    <div class="stat"><div class="stat-v">7</div><div class="stat-l">LLM Providers</div></div>
+    <div class="stat"><div class="stat-v">8</div><div class="stat-l">AI Agents</div></div>
+    <div class="stat"><div class="stat-v">10</div><div class="stat-l">Built-in Tools</div></div>
+    <div class="stat"><div class="stat-v">92.7%</div><div class="stat-l">Accuracy</div></div>
   </div>
+</section>
 
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-value">35M+</div>
-      <div class="stat-label">Free tokens/day</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">7</div>
-      <div class="stat-label">LLM Providers</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">8</div>
-      <div class="stat-label">Specialized Agents</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">10</div>
-      <div class="stat-label">Built-in Tools</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value">92.7%</div>
-      <div class="stat-label">Benchmark Accuracy</div>
-    </div>
-  </div>
-</div>
-
-<!-- ── COMPARISON ── -->
-<section id="compare">
+<!-- DASHBOARD PREVIEW -->
+<section class="preview-section" id="preview">
   <div class="container">
-    <div class="section-tag">VS THE COMPETITION</div>
-    <h2>Why teams are switching</h2>
-    <p class="section-sub">Synthron is built for developers who are tired of framework complexity and API bills.</p>
+    <span class="section-tag">LIVE ORCHESTRATION DASHBOARD</span>
+    <h2>Watch your agents think in real time</h2>
+    <p class="sub">Every thought, action, and decision from every agent — streamed live via WebSocket. Type any task and watch 8 agents coordinate to complete it.</p>
 
-    <div style="overflow-x:auto">
-      <table class="compare-table">
+    <div class="dashboard-preview">
+      <!-- Browser bar -->
+      <div class="preview-bar">
+        <div class="preview-dot" style="background:#ef4444"></div>
+        <div class="preview-dot" style="background:#f59e0b"></div>
+        <div class="preview-dot" style="background:#10b981"></div>
+        <div class="preview-url">synthron-clwp.onrender.com/dashboard</div>
+        <a href="https://synthron-clwp.onrender.com/dashboard" target="_blank" class="preview-open">Open Live →</a>
+      </div>
+      <!-- Dashboard body -->
+      <div class="preview-body">
+        <!-- Left sidebar - Agent graph -->
+        <div class="preview-sidebar">
+          <div class="preview-card">
+            <div class="preview-card-title">Agent Graph</div>
+            <div class="agent-row"><div class="adot run" style="background:#6366f1"></div><span style="font-size:11px;font-weight:600">Orchestrator</span><span style="margin-left:auto;font-size:9px;color:#7c3aed">running</span></div>
+            <div class="agent-row"><div class="adot run" style="background:#06b6d4"></div><span style="font-size:11px">Planner</span><span style="margin-left:auto;font-size:9px;color:#059669">done</span></div>
+            <div class="agent-row"><div class="adot run" style="background:#10b981"></div><span style="font-size:11px">Executor ×3</span><span style="margin-left:auto;font-size:9px;color:#7c3aed">running</span></div>
+            <div class="agent-row"><div class="adot" style="background:#f59e0b;opacity:0.4"></div><span style="font-size:11px;color:#a8a29e">Critic</span><span style="margin-left:auto;font-size:9px;color:#a8a29e">idle</span></div>
+            <div class="agent-row"><div class="adot" style="background:#8b5cf6;opacity:0.4"></div><span style="font-size:11px;color:#a8a29e">Memory</span><span style="margin-left:auto;font-size:9px;color:#a8a29e">idle</span></div>
+            <div class="agent-row"><div class="adot" style="background:#3b82f6;opacity:0.4"></div><span style="font-size:11px;color:#a8a29e">Researcher</span><span style="margin-left:auto;font-size:9px;color:#a8a29e">idle</span></div>
+            <div class="agent-row"><div class="adot" style="background:#e2e8f0;opacity:0.4"></div><span style="font-size:11px;color:#a8a29e">Coder</span><span style="margin-left:auto;font-size:9px;color:#a8a29e">idle</span></div>
+          </div>
+        </div>
+        <!-- Main - Thought stream -->
+        <div class="preview-main">
+          <div class="preview-stream">
+            <div class="pe plan"><span class="ptag or">ORCH</span>📋 Breaking task into 4 subtasks (complexity=7)</div>
+            <div class="pe thought"><span class="ptag pl">PLAN</span>💭 Analyzing: Research top 5 AI companies in 2026...</div>
+            <div class="pe action"><span class="ptag ex">EXEC</span>🔧 Running web_search: "top AI companies 2026 funding"</div>
+            <div class="pe action"><span class="ptag ex">EXEC</span>🔧 Running web_search: "OpenAI valuation 2026"</div>
+            <div class="pe action"><span class="ptag ex">EXEC</span>🔧 Running browser_tool: techcrunch.com/ai-funding...</div>
+            <div class="pe result"><span class="ptag cr">CRIT</span>✅ Score: 0.91 — Comprehensive, accurate, well-structured</div>
+            <div class="pe result"><span class="ptag or">ORCH</span>🏁 Task complete in 18.3s · 4,821 tokens used</div>
+          </div>
+          <div class="preview-input">
+            <div class="preview-input-box">Research the top 5 AI companies in 2026 and their funding</div>
+            <button class="preview-run">▶ Run</button>
+          </div>
+        </div>
+        <!-- Right sidebar - Metrics -->
+        <div class="preview-right">
+          <div class="preview-card">
+            <div class="preview-card-title">Session Stats</div>
+            <div class="metric-mini">
+              <div class="metric-box"><div class="mv" style="color:#059669">3</div><div class="ml">Done</div></div>
+              <div class="metric-box"><div class="mv" style="color:#dc2626">0</div><div class="ml">Errors</div></div>
+              <div class="metric-box"><div class="mv" style="color:#7c3aed">0.89</div><div class="ml">Avg Score</div></div>
+              <div class="metric-box"><div class="mv" style="color:#0891b2">14k</div><div class="ml">Tokens</div></div>
+            </div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-card-title">Providers</div>
+            <div class="provider-mini">
+              <div class="prov-row">Gemini<span class="prov-badge">ready</span></div>
+              <div class="prov-row">Groq<span class="prov-badge">ready</span></div>
+              <div class="prov-row">Cerebras<span class="prov-badge">ready</span></div>
+              <div class="prov-row">DeepSeek<span class="prov-badge">ready</span></div>
+              <div class="prov-row">OpenRouter<span class="prov-badge">ready</span></div>
+            </div>
+          </div>
+          <div class="preview-card" style="display:flex;align-items:center;gap:8px">
+            <div style="width:9px;height:9px;border-radius:50%;background:#059669;box-shadow:0 0 0 3px rgba(5,150,105,0.2)"></div>
+            <span style="font-size:11px;color:#059669;font-weight:700">WebSocket Connected</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="compare-section" id="compare">
+  <div class="container">
+    <span class="section-tag">VS COMPETITION</span>
+    <h2>Why developers are switching</h2>
+    <p class="sub">Built for developers who are tired of complex setups and unexpected API bills.</p>
+    <div class="table-wrap">
+      <table>
         <thead>
           <tr>
             <th>Feature</th>
             <th>LangChain</th>
             <th>CrewAI</th>
             <th>AutoGPT</th>
-            <th style="background:rgba(124,58,237,0.1)">⚡ SYNTHRON</th>
+            <th style="background:rgba(124,58,237,0.06)">⚡ SYNTHRON</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Setup time</td>
-            <td>30+ min</td>
-            <td>15 min</td>
-            <td>20 min</td>
-            <td class="synthron-col">&lt; 2 min</td>
-          </tr>
-          <tr>
-            <td>Free tokens/day</td>
-            <td class="cross">0</td>
-            <td class="cross">0</td>
-            <td class="cross">0</td>
-            <td class="synthron-col">35M+</td>
-          </tr>
-          <tr>
-            <td>Auto provider failover</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="synthron-col check">✓</td>
-          </tr>
-          <tr>
-            <td>Self-improvement</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="synthron-col check">✓</td>
-          </tr>
-          <tr>
-            <td>4-tier memory</td>
-            <td class="partial">Basic</td>
-            <td class="cross">✗</td>
-            <td class="partial">Basic</td>
-            <td class="synthron-col check">✓</td>
-          </tr>
-          <tr>
-            <td>Live dashboard</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="synthron-col check">✓</td>
-          </tr>
-          <tr>
-            <td>1-line usage</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="synthron-col check">✓</td>
-          </tr>
-          <tr>
-            <td>Benchmark accuracy</td>
-            <td>79%</td>
-            <td>81%</td>
-            <td>77%</td>
-            <td class="synthron-col">92.7%</td>
-          </tr>
+          <tr><td>Setup time</td><td>30+ min</td><td>15 min</td><td>20 min</td><td class="synth">&lt; 2 min</td></tr>
+          <tr><td>Free tokens/day</td><td class="cx">0</td><td class="cx">0</td><td class="cx">0</td><td class="synth">35M+</td></tr>
+          <tr><td>Auto provider failover</td><td class="cx">✗</td><td class="cx">✗</td><td class="cx">✗</td><td class="synth ck">✓</td></tr>
+          <tr><td>Self-improvement</td><td class="cx">✗</td><td class="cx">✗</td><td class="cx">✗</td><td class="synth ck">✓</td></tr>
+          <tr><td>Live dashboard</td><td class="cx">✗</td><td class="cx">✗</td><td class="cx">✗</td><td class="synth ck">✓</td></tr>
+          <tr><td>1-line usage</td><td class="cx">✗</td><td class="cx">✗</td><td class="cx">✗</td><td class="synth ck">✓</td></tr>
+          <tr><td>Benchmark accuracy</td><td>79%</td><td>81%</td><td>77%</td><td class="synth">92.7%</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </section>
 
-<!-- ── FEATURES ── -->
-<section id="features" style="background:var(--surface)">
+<!-- FEATURES -->
+<section class="features-section" id="features">
   <div class="container">
-    <div class="section-tag">CAPABILITIES</div>
-    <h2>Everything you need. Nothing you don't.</h2>
-    <p class="section-sub">Production-grade from day one — no boilerplate, no wiring, no configuration hell.</p>
-
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🧠</div>
-        <h3>Smart Router</h3>
-        <p>Automatically routes to the best available provider. If one hits rate limits, it switches to the next — seamlessly.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🤖</div>
-        <h3>8 Specialized Agents</h3>
-        <p>Planner, Executor, Critic, Researcher, Coder, Memory, Coordinator — each optimized for its role.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>DAG Parallel Execution</h3>
-        <p>Subtasks with no dependencies run in parallel. 3× faster than sequential agent frameworks.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">💾</div>
-        <h3>4-Tier Memory</h3>
-        <p>Working → Short-term (Redis) → Long-term (ChromaDB) → Episodic (SQLite). Full context across sessions.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📈</div>
-        <h3>Self-Improving</h3>
-        <p>Learns what prompts work, which tools are best for each task type, and gets smarter with every run.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🛠️</div>
-        <h3>10 Built-in Tools</h3>
-        <p>Web search, code execution, file I/O, browser scraping, calculator, data analysis — all sandboxed and secure.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔴</div>
-        <h3>Live Dashboard</h3>
-        <p>React dashboard with real-time agent graph, event stream, and token metrics via WebSocket.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🚀</div>
-        <h3>REST + WebSocket API</h3>
-        <p>FastAPI server with streaming SSE, WebSocket, Swagger docs, and full async support out of the box.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🐳</div>
-        <h3>Docker Ready</h3>
-        <p>One command spins up the full stack: API + Redis + ChromaDB + Dashboard with docker compose up.</p>
-      </div>
+    <span class="section-tag">CAPABILITIES</span>
+    <h2>Everything built in. Nothing to wire up.</h2>
+    <p class="sub">Production-grade from day one — no boilerplate, no config hell.</p>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">🧠</div><h3>Smart Router</h3><p>Routes to the best available provider. If one hits rate limits, switches instantly — no downtime, no code changes.</p></div>
+      <div class="feat-card"><div class="feat-icon">⚡</div><h3>Parallel DAG Execution</h3><p>Independent subtasks run in parallel automatically. 3× faster than sequential agent frameworks.</p></div>
+      <div class="feat-card"><div class="feat-icon">💾</div><h3>4-Tier Memory</h3><p>Working → Short-term (Redis) → Long-term (ChromaDB) → Episodic (SQLite). Full context across sessions.</p></div>
+      <div class="feat-card"><div class="feat-icon">📈</div><h3>Self-Improving</h3><p>Learns which prompts work, which tools suit each task type, and improves automatically with every run.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔴</div><h3>Live Dashboard</h3><p>React dashboard with real-time agent graph, thought stream, and metrics via WebSocket. Try it now ↗</p></div>
+      <div class="feat-card"><div class="feat-icon">🛠️</div><h3>10 Built-in Tools</h3><p>Web search, code execution, browser scraping, calculator, file I/O, data analysis — all sandboxed.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔒</div><h3>Secure Sandbox</h3><p>CodeExecutor uses subprocess isolation. FileTool restricts to workspace. ApiCallerTool blocks private IPs.</p></div>
+      <div class="feat-card"><div class="feat-icon">🐳</div><h3>Docker Ready</h3><p>One command starts the full stack: API + Redis + ChromaDB + Dashboard with docker compose up.</p></div>
+      <div class="feat-card"><div class="feat-icon">🚀</div><h3>REST + WebSocket API</h3><p>FastAPI server with SSE streaming, WebSocket, Swagger docs, and full async support out of the box.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ── PROVIDERS ── -->
-<section id="providers">
+<!-- PROVIDERS -->
+<section class="providers-section" id="providers">
   <div class="container">
-    <div class="section-tag">PROVIDERS</div>
+    <span class="section-tag">PROVIDERS</span>
     <h2>35M+ free tokens per day</h2>
-    <p class="section-sub">Connect as many providers as you have keys. Synthron uses them all intelligently.</p>
-
-    <div class="provider-grid">
-      <div class="provider-card">
-        <div class="provider-name">Gemini</div>
-        <div class="provider-free">✓ Free</div>
-        <div class="provider-limit">1M tokens/day</div>
-      </div>
-      <div class="provider-card">
-        <div class="provider-name">Groq</div>
-        <div class="provider-free">✓ Free</div>
-        <div class="provider-limit">14,400 req/day</div>
-      </div>
-      <div class="provider-card">
-        <div class="provider-name">Cerebras</div>
-        <div class="provider-free">✓ Free</div>
-        <div class="provider-limit">1M tokens/day</div>
-      </div>
-      <div class="provider-card">
-        <div class="provider-name">DeepSeek</div>
-        <div class="provider-free">$5 credit</div>
-        <div class="provider-limit">5M tokens</div>
-      </div>
-      <div class="provider-card">
-        <div class="provider-name">OpenRouter</div>
-        <div class="provider-free">$1 credit</div>
-        <div class="provider-limit">Free models</div>
-      </div>
-      <div class="provider-card">
-        <div class="provider-name">GitHub Models</div>
-        <div class="provider-free">✓ Free</div>
-        <div class="provider-limit">Rate limited</div>
-      </div>
-      <div class="provider-card">
-        <div class="provider-name">Ollama</div>
-        <div class="provider-free">✓ Local</div>
-        <div class="provider-limit">Unlimited</div>
-      </div>
+    <p class="sub">Add as many provider keys as you have. SYNTHRON uses them all intelligently with automatic failover.</p>
+    <div class="prov-grid">
+      <div class="prov-card"><div class="prov-name">Gemini</div><div class="prov-free">✓ Free</div><div class="prov-limit">1M tokens/day</div></div>
+      <div class="prov-card"><div class="prov-name">Groq</div><div class="prov-free">✓ Free</div><div class="prov-limit">14,400 req/day</div></div>
+      <div class="prov-card"><div class="prov-name">Cerebras</div><div class="prov-free">✓ Free</div><div class="prov-limit">1M tokens/day</div></div>
+      <div class="prov-card"><div class="prov-name">DeepSeek</div><div class="prov-free">$5 credit</div><div class="prov-limit">5M tokens</div></div>
+      <div class="prov-card"><div class="prov-name">OpenRouter</div><div class="prov-free">$1 credit</div><div class="prov-limit">Free models</div></div>
+      <div class="prov-card"><div class="prov-name">GitHub Models</div><div class="prov-free">✓ Free</div><div class="prov-limit">Rate limited</div></div>
+      <div class="prov-card"><div class="prov-name">Ollama</div><div class="prov-free">✓ Local</div><div class="prov-limit">Unlimited</div></div>
     </div>
   </div>
 </section>
 
-<!-- ── INSTALL ── -->
-<section id="install" style="background:var(--surface)">
+<!-- INSTALL -->
+<section class="install-section" id="install">
   <div class="container">
-    <div class="section-tag">GET STARTED</div>
-    <h2>Up in under 2 minutes</h2>
-    <p class="section-sub">pip install, add your keys, run. No boilerplate, no config files, no wiring.</p>
-
-    <div class="install-block" style="max-width:720px">
-      <div class="install-tabs">
-        <div class="tab active">pip</div>
-        <div class="tab">Docker</div>
-        <div class="tab">Source</div>
+    <span class="section-tag">GET STARTED</span>
+    <h2>Up and running in 2 minutes</h2>
+    <p class="sub" style="margin-bottom:2rem">pip install, add your free keys, run. One line of Python is all it takes.</p>
+    <div class="code-box">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ef4444"></div>
+        <div class="code-dot" style="background:#f59e0b"></div>
+        <div class="code-dot" style="background:#10b981"></div>
+        <span class="code-label">quickstart.py</span>
       </div>
-      <div class="install-code">
-        <span style="color:#6b7280"># 1. Install</span><br />
-        <span style="color:#e2e2f0">pip install synthron</span><br /><br />
-        <span style="color:#6b7280"># 2. Configure (free keys from aistudio.google.com + console.groq.com)</span><br />
-        <span style="color:#e2e2f0">cp .env.example .env</span><br />
-        <span style="color:#6b7280"># Add GEMINI_API_KEY and GROQ_API_KEY to .env</span><br /><br />
-        <span style="color:#6b7280"># 3. Run</span><br />
-        <span style="color:#7c3aed">import</span> <span style="color:#e2e2f0">asyncio</span><br />
-        <span style="color:#7c3aed">from</span> <span style="color:#e2e2f0">synthron</span> <span style="color:#7c3aed">import</span> <span style="color:#06b6d4">run</span><br /><br />
-        <span style="color:#e2e2f0">result = asyncio.</span><span style="color:#06b6d4">run</span><span style="color:#e2e2f0">(</span><span style="color:#06b6d4">run</span><span style="color:#e2e2f0">(</span><span style="color:#10b981">"Your task here"</span><span style="color:#e2e2f0">))</span><br />
-        <span style="color:#06b6d4">print</span><span style="color:#e2e2f0">(result)</span>
+      <div class="code-body">
+        <span class="c-comment"># 1. Install</span><br/>
+        <span class="c-prompt">$</span> <span class="c-cmd">pip install synthron</span><br/><br/>
+        <span class="c-comment"># 2. Add free keys to .env</span><br/>
+        <span class="c-cmd">GEMINI_API_KEY=your_key  </span><span class="c-comment"># aistudio.google.com</span><br/>
+        <span class="c-cmd">GROQ_API_KEY=your_key    </span><span class="c-comment"># console.groq.com</span><br/><br/>
+        <span class="c-comment"># 3. Run — it's this simple</span><br/>
+        <span class="c-kw">import</span> <span class="c-cmd">asyncio</span><br/>
+        <span class="c-kw">from</span> <span class="c-cmd">synthron</span> <span class="c-kw">import</span> <span class="c-fn">run</span><br/><br/>
+        <span class="c-cmd">result = asyncio.</span><span class="c-fn">run</span><span class="c-cmd">(</span><span class="c-fn">run</span><span class="c-cmd">(</span><span class="c-str">"Research the top AI trends in 2026"</span><span class="c-cmd">))</span><br/>
+        <span class="c-fn">print</span><span class="c-cmd">(result)</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── FOOTER ── -->
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Ready to build with <span class="grad">SYNTHRON</span>?</h2>
+  <p>Open source, MIT licensed, free forever. Star it on GitHub to support the project.</p>
+  <div class="cta-btns">
+    <a href="https://synthron-clwp.onrender.com/dashboard" target="_blank" class="btn-main">🔴 Try Live Dashboard</a>
+    <a href="https://github.com/vignesh2027/synthron" target="_blank" class="btn-out">⭐ Star on GitHub</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
-  <div class="footer-links">
+  <div class="foot-links">
     <a href="https://github.com/vignesh2027/synthron">GitHub</a>
-    <a href="https://github.com/vignesh2027/synthron/tree/main/docs">Documentation</a>
+    <a href="https://github.com/vignesh2027/synthron/tree/main/docs">Docs</a>
+    <a href="https://synthron-clwp.onrender.com/docs">API Reference</a>
     <a href="https://github.com/vignesh2027/synthron/blob/main/CONTRIBUTING.md">Contributing</a>
     <a href="https://github.com/vignesh2027/synthron/blob/main/LICENSE">MIT License</a>
   </div>
-  <p>Built with ❤️ by <a href="https://github.com/vignesh2027">vignesh2027</a> · Open source · Free forever</p>
+  <p>Built by <a href="https://github.com/vignesh2027">vignesh2027</a> · Open source · Free forever</p>
 </footer>
 
 </body>
