@@ -99,6 +99,33 @@
 
     .nav-cta:hover { opacity: 0.85; }
 
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: #10b981;
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .live-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .live-badge:hover { background: rgba(16,185,129,0.2); }
+
     /* ── HERO ── */
     .hero {
       position: relative;
@@ -439,7 +466,10 @@
 <div class="hero">
   <div class="hero-glow"></div>
 
-  <div class="badge">🚀 Open Source · MIT License · v1.0</div>
+  <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem">
+    <div class="badge">🚀 Open Source · MIT License · v1.0</div>
+    <a href="https://synthron.onrender.com" target="_blank" class="live-badge">LIVE DEMO</a>
+  </div>
 
   <h1>
     The AI Agent<br />
@@ -454,8 +484,9 @@
   </p>
 
   <div class="hero-actions">
-    <a href="https://github.com/vignesh2027/synthron" class="btn-primary">⭐ Star on GitHub</a>
-    <a href="#install" class="btn-secondary">Get Started →</a>
+    <a href="https://synthron.onrender.com" target="_blank" class="btn-primary">🔴 Live Dashboard →</a>
+    <a href="https://github.com/vignesh2027/synthron" class="btn-secondary">⭐ Star on GitHub</a>
+    <a href="#install" class="btn-secondary">Get Started</a>
   </div>
 
   <div class="code-block">

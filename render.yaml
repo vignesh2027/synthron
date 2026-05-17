@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: synthron-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt && pip install -e . --no-deps
+    startCommand: python -m uvicorn synthron.api.main:app --host 0.0.0.0 --port $PORT --workers 1
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CEREBRAS_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: SYNTHRON_ENV
+        value: production
+      - key: CHROMA_PERSIST_DIR
+        value: /tmp/chroma
+      - key: SQLITE_URL
+        value: sqlite+aiosqlite:////tmp/synthron.db
+    healthCheckPath: /health
+    plan: free
