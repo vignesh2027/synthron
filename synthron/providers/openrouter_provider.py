@@ -88,68 +88,70 @@ class OpenRouterProvider(BaseProvider):
         return msgs
 
     async def generate(self, request: GenerationRequest) -> GenerationResponse:
-        """Generate via OpenRouter.
-
-        Args:
-            request: Unified generation request.
-
-        Returns:
-            GenerationResponse from the selected free model.
-        """
         estimated_tokens = sum(count_tokens(m.content) for m in request.messages)
         await rate_registry.acquire("openrouter", estimated_tokens)
 
-        model_name = self.get_model(request.model)
         messages = self._build_messages(request)
+        last_error: Exception | None = None
 
-        try:
-            with RequestTimer() as timer:
-                completion = await self._client.chat.completions.create(
+        # Try free models in sequence until one succeeds
+        models_to_try = list(FREE_MODELS)
+        requested = self.get_model(request.model)
+        if requested not in models_to_try:
+            models_to_try.insert(0, requested)
+
+        for model_name in models_to_try:
+            try:
+                with RequestTimer() as timer:
+                    completion = await self._client.chat.completions.create(
+                        model=model_name,
+                        messages=messages,
+                        temperature=request.temperature,
+                        max_tokens=request.max_tokens,
+                    )
+
+                choice = completion.choices[0]
+                text = choice.message.content or ""
+                usage = completion.usage
+
+                input_toks = usage.prompt_tokens if usage else estimated_tokens
+                output_toks = usage.completion_tokens if usage else count_tokens(text)
+                total_toks = input_toks + output_toks
+
+                daily_tracker.add("openrouter", total_toks)
+                rate_registry.get("openrouter").record_response(total_toks)
+
+                resp = GenerationResponse(
+                    content=text,
                     model=model_name,
-                    messages=messages,
-                    temperature=request.temperature,
-                    max_tokens=request.max_tokens,
+                    provider="openrouter",
+                    input_tokens=input_toks,
+                    output_tokens=output_toks,
+                    total_tokens=total_toks,
+                    latency_ms=timer.elapsed_ms,
+                    finish_reason=choice.finish_reason or "stop",
                 )
+                self._record_success(resp)
+                logger.debug(f"[openrouter] {total_toks} tokens | {timer.elapsed_ms:.0f}ms | {model_name}")
+                return resp
 
-            choice = completion.choices[0]
-            text = choice.message.content or ""
-            usage = completion.usage
+            except OAIRateLimitError as exc:
+                self._record_error()
+                raise RateLimitError("openrouter") from exc
+            except OAIAuthError as exc:
+                self._record_error()
+                raise ProviderAuthError("openrouter") from exc
+            except Exception as exc:
+                msg = str(exc).lower()
+                if "503" in msg or "unavailable" in msg:
+                    self._record_error()
+                    raise ProviderUnavailableError("openrouter", str(exc)) from exc
+                logger.debug(f"[openrouter] model {model_name} failed: {exc}, trying next")
+                last_error = exc
+                continue
 
-            input_toks = usage.prompt_tokens if usage else estimated_tokens
-            output_toks = usage.completion_tokens if usage else count_tokens(text)
-            total_toks = input_toks + output_toks
-
-            daily_tracker.add("openrouter", total_toks)
-            rate_registry.get("openrouter").record_response(total_toks)
-
-            resp = GenerationResponse(
-                content=text,
-                model=model_name,
-                provider="openrouter",
-                input_tokens=input_toks,
-                output_tokens=output_toks,
-                total_tokens=total_toks,
-                latency_ms=timer.elapsed_ms,
-                finish_reason=choice.finish_reason or "stop",
-            )
-            self._record_success(resp)
-            logger.debug(
-                f"[openrouter] {total_toks} tokens | {timer.elapsed_ms:.0f}ms | {model_name}"
-            )
-            return resp
-
-        except OAIRateLimitError as exc:
-            self._record_error()
-            raise RateLimitError("openrouter") from exc
-        except OAIAuthError as exc:
-            self._record_error()
-            raise ProviderAuthError("openrouter") from exc
-        except Exception as exc:
-            self._record_error()
-            msg = str(exc).lower()
-            if "503" in msg or "unavailable" in msg:
-                raise ProviderUnavailableError("openrouter", str(exc)) from exc
-            raise ProviderError(f"OpenRouter error: {exc}", provider="openrouter") from exc
+        self._record_error()
+        raise ProviderError(f"All OpenRouter models failed: {last_error}", provider="openrouter") from last_error
 
     async def generate_stream(self, request: GenerationRequest) -> AsyncIterator[str]:
         """Stream from OpenRouter.

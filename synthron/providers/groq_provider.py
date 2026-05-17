@@ -37,6 +37,17 @@ _GROQ_MODELS = {
     "gemma": "gemma2-9b-it",
 }
 
+# Fallback chain — try newest/largest first, work down to reliably available models
+_GROQ_FALLBACK_MODELS = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-70b-versatile",
+    "llama3-70b-8192",
+    "llama-3.1-8b-instant",
+    "llama3-8b-8192",
+    "mixtral-8x7b-32768",
+    "gemma2-9b-it",
+]
+
 
 class GroqProvider(BaseProvider):
     """Groq LPU provider using official groq-python SDK.
@@ -83,77 +94,87 @@ class GroqProvider(BaseProvider):
         return msgs
 
     async def generate(self, request: GenerationRequest) -> GenerationResponse:
-        """Generate a completion via Groq.
-
-        Args:
-            request: Unified generation request.
-
-        Returns:
-            GenerationResponse with text and usage.
-        """
         estimated_tokens = sum(count_tokens(m.content, "groq") for m in request.messages)
         await rate_registry.acquire("groq", estimated_tokens)
 
-        model_name = self.get_model(request.model)
         messages = self._build_messages(request)
+        last_error: Exception | None = None
 
-        kwargs: dict = {
-            "model": model_name,
-            "messages": messages,
-            "temperature": request.temperature,
-            "max_tokens": min(request.max_tokens, 32_768),
-        }
-        if request.stop_sequences:
-            kwargs["stop"] = request.stop_sequences
+        # Try each model in the fallback chain until one works
+        models_to_try = _GROQ_FALLBACK_MODELS[:]
+        # If caller requested a specific model, try it first
+        requested = self.get_model(request.model)
+        if requested not in models_to_try:
+            models_to_try.insert(0, requested)
 
-        try:
-            with RequestTimer() as timer:
-                completion = await self._client.chat.completions.create(**kwargs)
+        for model_name in models_to_try:
+            kwargs: dict = {
+                "model": model_name,
+                "messages": messages,
+                "temperature": request.temperature,
+                "max_tokens": min(request.max_tokens, 32_768),
+            }
+            if request.stop_sequences:
+                kwargs["stop"] = request.stop_sequences
 
-            choice = completion.choices[0]
-            text = choice.message.content or ""
-            usage = completion.usage
+            try:
+                with RequestTimer() as timer:
+                    completion = await self._client.chat.completions.create(**kwargs)
 
-            input_toks = usage.prompt_tokens if usage else estimated_tokens
-            output_toks = usage.completion_tokens if usage else count_tokens(text, "groq")
-            total_toks = input_toks + output_toks
+                choice = completion.choices[0]
+                text = choice.message.content or ""
+                usage = completion.usage
 
-            daily_tracker.add("groq", total_toks)
-            rate_registry.get("groq").record_response(total_toks)
+                input_toks = usage.prompt_tokens if usage else estimated_tokens
+                output_toks = usage.completion_tokens if usage else count_tokens(text, "groq")
+                total_toks = input_toks + output_toks
 
-            resp = GenerationResponse(
-                content=text,
-                model=model_name,
-                provider="groq",
-                input_tokens=input_toks,
-                output_tokens=output_toks,
-                total_tokens=total_toks,
-                latency_ms=timer.elapsed_ms,
-                finish_reason=choice.finish_reason or "stop",
-            )
-            self._record_success(resp)
-            logger.debug(
-                f"[groq] {total_toks} tokens | {timer.elapsed_ms:.0f}ms | {model_name}"
-            )
-            return resp
+                daily_tracker.add("groq", total_toks)
+                rate_registry.get("groq").record_response(total_toks)
 
-        except GroqRateLimitError as exc:
-            self._record_error()
-            raise RateLimitError("groq") from exc
-        except GroqAuthError as exc:
-            self._record_error()
-            raise ProviderAuthError("groq") from exc
-        except GroqBadRequestError as exc:
-            self._record_error()
-            if "context" in str(exc).lower() or "token" in str(exc).lower():
-                raise TokenLimitError("groq", estimated_tokens, 128_000) from exc
-            raise ProviderError(f"Groq bad request: {exc}", provider="groq") from exc
-        except Exception as exc:
-            self._record_error()
-            msg = str(exc).lower()
-            if "503" in msg or "unavailable" in msg:
-                raise ProviderUnavailableError("groq", str(exc)) from exc
-            raise ProviderError(f"Groq error: {exc}", provider="groq") from exc
+                resp = GenerationResponse(
+                    content=text,
+                    model=model_name,
+                    provider="groq",
+                    input_tokens=input_toks,
+                    output_tokens=output_toks,
+                    total_tokens=total_toks,
+                    latency_ms=timer.elapsed_ms,
+                    finish_reason=choice.finish_reason or "stop",
+                )
+                self._record_success(resp)
+                logger.debug(f"[groq] {total_toks} tokens | {timer.elapsed_ms:.0f}ms | {model_name}")
+                return resp
+
+            except GroqRateLimitError as exc:
+                self._record_error()
+                raise RateLimitError("groq") from exc
+            except GroqAuthError as exc:
+                self._record_error()
+                raise ProviderAuthError("groq") from exc
+            except GroqBadRequestError as exc:
+                msg = str(exc).lower()
+                if "model" in msg or "not found" in msg or "deprecated" in msg or "does not exist" in msg:
+                    logger.debug(f"[groq] model {model_name} unavailable: {exc}, trying next")
+                    last_error = exc
+                    continue
+                if "context" in msg or "token" in msg:
+                    self._record_error()
+                    raise TokenLimitError("groq", estimated_tokens, 128_000) from exc
+                self._record_error()
+                raise ProviderError(f"Groq bad request: {exc}", provider="groq") from exc
+            except Exception as exc:
+                msg = str(exc).lower()
+                if "503" in msg or "unavailable" in msg:
+                    self._record_error()
+                    raise ProviderUnavailableError("groq", str(exc)) from exc
+                # Treat other errors as model-level failures and try next
+                logger.debug(f"[groq] model {model_name} failed: {exc}, trying next")
+                last_error = exc
+                continue
+
+        self._record_error()
+        raise ProviderError(f"All Groq models failed: {last_error}", provider="groq") from last_error
 
     async def generate_stream(self, request: GenerationRequest) -> AsyncIterator[str]:
         """Stream Groq completions token by token.
