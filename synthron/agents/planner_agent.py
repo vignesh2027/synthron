@@ -178,31 +178,48 @@ class PlannerAgent(BaseAgent):
             return max(1, min(10, int(digits[0])))
         return 5
 
-    def _parse_plan_response(self, raw: str, task: str) -> TaskPlan:
-        """Parse the LLM's JSON plan response into a TaskPlan.
-
-        Args:
-            raw: Raw LLM output string.
-            task: Original task for context.
-
-        Returns:
-            Parsed TaskPlan.
-
-        Raises:
-            PlanningError: If JSON cannot be parsed or plan is malformed.
-        """
-        # Strip markdown fences if present
-        clean = re.sub(r"```(?:json)?\s*", "", raw).strip().rstrip("```").strip()
-
-        # Extract JSON object
-        match = re.search(r"\{.*\}", clean, re.DOTALL)
-        if not match:
-            raise PlanningError(self.name, task, f"No JSON found in planner response: {raw[:200]}")
-
+    @staticmethod
+    def _extract_json(raw: str) -> dict | None:
+        """Try multiple strategies to extract a JSON object from raw LLM output."""
+        # Strategy 1: direct parse
         try:
-            data = json.loads(match.group())
-        except json.JSONDecodeError as exc:
-            raise PlanningError(self.name, task, f"Invalid JSON: {exc}. Raw: {raw[:200]}") from exc
+            return json.loads(raw.strip())
+        except json.JSONDecodeError:
+            pass
+
+        # Strategy 2: find first { to last }
+        start = raw.find("{")
+        end = raw.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(raw[start : end + 1])
+            except json.JSONDecodeError:
+                pass
+
+        # Strategy 3: strip ALL backtick fences line by line then retry
+        lines = [l for l in raw.splitlines() if not l.strip().startswith("```")]
+        cleaned = "\n".join(lines).strip()
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(cleaned[start : end + 1])
+            except json.JSONDecodeError:
+                pass
+
+        return None
+
+    def _parse_plan_response(self, raw: str, task: str) -> TaskPlan:
+        """Parse the LLM's JSON plan response into a TaskPlan."""
+        data = self._extract_json(raw)
+        if data is None:
+            # Fallback — treat as single subtask instead of crashing
+            data = {
+                "complexity": 3,
+                "estimated_time_s": 30,
+                "subtasks": [{"index": 1, "title": "Execute task", "description": task,
+                               "tool_hint": "web_search", "depends_on": []}],
+            }
 
         raw_subtasks = data.get("subtasks", [])
         if not raw_subtasks:
