@@ -242,7 +242,8 @@ function TaskInput({ onSubmit, isRunning }) {
 
 /* ─── App Root ───────────────────────────────────────────── */
 function App() {
-  const wsUrl = `ws://${window.location.hostname}:${window.location.port || 8080}/ws/events/all`;
+  const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  const wsUrl = `${wsProto}://${window.location.host}/ws/events/all`;
   const { events, connected } = useWebSocket(wsUrl);
   const [isRunning, setIsRunning] = useState(false);
   const [localEvents, setLocalEvents] = useState([]);
