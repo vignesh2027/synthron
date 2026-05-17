@@ -210,9 +210,17 @@ class Orchestrator:
             )
 
             # ── STEP 4: Merge results into final output ──────────────────────
+            await self._emit("executing", "orchestrator", "coordinator",
+                             "Synthesizing results...", session.id)
             final_output = await self._merge_results(task, plan, all_results)
             elapsed_s = time.perf_counter() - run_start
             success = any(r.success for r in all_results)
+
+            # Emit the actual answer to the dashboard in chunks
+            chunk_size = 600
+            for i in range(0, len(final_output), chunk_size):
+                chunk = final_output[i:i + chunk_size]
+                await self._emit("result", "orchestrator", "orchestrator", chunk, session.id)
 
             # ── STEP 5: Memory persistence ───────────────────────────────────
             await self._memory.remember_task_result(task, final_output[:2000], success)
@@ -342,25 +350,25 @@ class Orchestrator:
         if len(successful) == 1:
             return successful[0].output
 
-        # Synthesize with planner (Gemini — large context)
+        # Fast synthesis using executor agent (routes to Groq/Cerebras — much faster)
         sections = "\n\n".join(
-            f"### {r.subtask_title}\n{r.output[:1500]}"
+            f"### {r.subtask_title}\n{r.output[:1200]}"
             for r in successful
         )
         synthesis_prompt = (
-            f"Original task: {task}\n\n"
-            f"Results from {len(successful)} subtasks:\n{sections}\n\n"
-            f"Synthesize all these results into one comprehensive, well-structured final report. "
-            f"Integrate everything seamlessly. Format with headers and bullets where appropriate."
+            f"Task: {task}\n\n"
+            f"Subtask results:\n{sections}\n\n"
+            f"Write a clear, well-structured final answer. Use headers and bullets. Be concise."
         )
 
         try:
-            response = await self._pool.planner.generate(
-                synthesis_prompt, max_tokens=4096, temperature=0.4
+            executor = await self._pool.get_executor()
+            response = await executor.generate(
+                synthesis_prompt, max_tokens=2048, temperature=0.3
             )
             return response.content
         except Exception as exc:
-            logger.warning(f"[orchestrator] Synthesis failed: {exc}, concatenating instead")
+            logger.warning(f"[orchestrator] Synthesis failed: {exc}, concatenating")
             return "\n\n".join(
                 f"## {r.subtask_title}\n{r.output}" for r in successful
             )

@@ -104,6 +104,23 @@ function ThoughtStream({ events }) {
         const tagClass = `tag-${event.agent_type || event.agent || 'orchestrator'}`;
         const entryClass = `thought-entry ${event.type || 'thought'}`;
 
+        // Final answer chunks — display in a readable block
+        if (event.type === 'result' && (event.agent === 'orchestrator' || event.agent_type === 'orchestrator')) {
+          return (
+            <div key={event.id} className="thought-entry result" style={{
+              display: 'block', padding: '10px 14px',
+              borderLeft: '3px solid #059669', background: '#f0fdf6',
+              fontFamily: 'inherit', fontSize: 13, lineHeight: 1.7,
+              whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#059669', marginBottom: 6, fontFamily: 'monospace' }}>
+                ✅ ANSWER
+              </div>
+              {event.content}
+            </div>
+          );
+        }
+
         return (
           <div key={event.id} className={entryClass}>
             <span className={`agent-tag ${tagClass}`}>
