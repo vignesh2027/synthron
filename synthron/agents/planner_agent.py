@@ -223,26 +223,24 @@ class PlannerAgent(BaseAgent):
 
         raw_subtasks = data.get("subtasks", [])
         if not raw_subtasks:
-            # Fallback: treat the whole task as one subtask
-            raw_subtasks = [
-                {
-                    "index": 1,
-                    "title": "Execute task",
-                    "description": task,
-                    "tool_hint": "web_search",
-                    "depends_on": [],
-                }
-            ]
+            raw_subtasks = [{"index": 1, "title": "Execute task",
+                             "description": task, "tool_hint": "web_search", "depends_on": []}]
 
+        # Build subtasks using index as ID so depends_on integers resolve correctly
         subtasks = []
         for i, st_data in enumerate(raw_subtasks):
+            idx = int(st_data.get("index", i + 1))
+            # LLM often returns depends_on as integers (indices) — coerce to strings
+            raw_deps = st_data.get("depends_on", [])
+            depends_on = [str(d) for d in raw_deps if d != idx]
             subtasks.append(
                 SubTask(
-                    index=st_data.get("index", i + 1),
-                    title=st_data.get("title", f"Subtask {i+1}"),
+                    id=str(idx),          # ID = "1", "2", ... matches LLM's index refs
+                    index=idx,
+                    title=st_data.get("title", f"Subtask {idx}"),
                     description=st_data.get("description", ""),
                     tool_hint=st_data.get("tool_hint", ""),
-                    depends_on=st_data.get("depends_on", []),
+                    depends_on=depends_on,
                     status=TaskStatus.PENDING,
                 )
             )

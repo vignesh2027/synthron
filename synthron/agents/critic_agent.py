@@ -186,17 +186,36 @@ class CriticAgent(BaseAgent):
         Returns:
             Parsed CriticScore.
         """
-        clean = re.sub(r"```(?:json)?\s*", "", raw).strip().rstrip("```").strip()
-        match = re.search(r"\{.*\}", clean, re.DOTALL)
+        data = None
+        # Strategy 1: direct parse
+        try:
+            data = json.loads(raw.strip())
+        except json.JSONDecodeError:
+            pass
+        # Strategy 2: find { ... } span
+        if data is None:
+            s, e = raw.find("{"), raw.rfind("}")
+            if s != -1 and e > s:
+                try:
+                    data = json.loads(raw[s:e + 1])
+                except json.JSONDecodeError:
+                    pass
+        # Strategy 3: strip fence lines then retry
+        if data is None:
+            cleaned = "\n".join(l for l in raw.splitlines() if not l.strip().startswith("```"))
+            s, e = cleaned.find("{"), cleaned.rfind("}")
+            if s != -1 and e > s:
+                try:
+                    data = json.loads(cleaned[s:e + 1])
+                except json.JSONDecodeError:
+                    pass
 
-        if not match:
-            # Fallback: try to extract score from plain text
+        if data is None:
             nums = re.findall(r"0\.\d+|1\.0", raw)
             score_val = float(nums[0]) if nums else 0.6
             return CriticScore.from_score(subtask_id, score_val, raw[:200])
 
         try:
-            data = json.loads(match.group())
             raw_score = float(data.get("score", 0.6))
             score_val = max(0.0, min(1.0, raw_score))
             feedback = str(data.get("feedback", ""))
