@@ -94,17 +94,6 @@ That's it. **One line.**
 
 ---
 
-## Provider Setup (Free Tier)
-
-| Provider | Free Tier | Daily Limit | Best For |
-|----------|-----------|-------------|----------|
-| [Google AI Studio](https://aistudio.google.com) | ✅ Free | 1M tokens | General tasks |
-| [Groq](https://console.groq.com) | ✅ Free | 14,400 req | Speed |
-| [Cerebras](https://cloud.cerebras.ai) | ✅ Free | 1M tokens | Ultra-fast |
-| [DeepSeek](https://platform.deepseek.com) | ✅ $5 credit | 5M tokens | Reasoning |
-| [OpenRouter](https://openrouter.ai) | ✅ $1 credit | Varies | Diversity |
-| [GitHub Models](https://github.com/marketplace/models) | ✅ Free | Rate-limited | Dev testing |
-| [Ollama](https://ollama.ai) | ✅ Local | Unlimited | Privacy |
 
 **Total free capacity: 35M+ tokens/day across all providers.**
 
